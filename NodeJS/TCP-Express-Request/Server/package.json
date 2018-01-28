@@ -1,0 +1,17 @@
+{
+  "name": "ip-updater-server",
+  "version": "1.0.0",
+  "description": "Server to receive ip addresses",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "express": "^4.15.2",
+    "fs": "0.0.1-security",
+    "https": "^1.0.0"
+  }
+}

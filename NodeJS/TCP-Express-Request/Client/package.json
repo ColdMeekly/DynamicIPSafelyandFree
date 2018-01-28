@@ -1,0 +1,15 @@
+{
+  "name": "ip-updater",
+  "version": "1.0.0",
+  "description": "Connects to ip-updater-server",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ScreenMan",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
+  }
+}
