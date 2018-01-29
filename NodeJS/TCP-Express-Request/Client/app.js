@@ -4,7 +4,7 @@ const os = require('os');
 const SUCCESS_CODE = 204;
 const options = {
     method: 'GET',
-    uri: 'https://iplogger:iamauthorizedpleaseletmein1337@juan.screenman.pro/updater',
+    uri: 'https://user:password@juan.screenman.pro/updater',
     headers: {
         'User-Agent': 'Undefined'
     },
@@ -20,7 +20,7 @@ rp(options)
         if (statusCode == SUCCESS_CODE) {
           console.log('Successfully updated IP Address of this machine!')
         } else {
-          console.log('ERROR - Someone is spoofing the server!')
+          console.log('Rejected by server - incorrect settings!')
         }
     })
     .catch((err) => {
