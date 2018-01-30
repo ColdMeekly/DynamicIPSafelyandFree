@@ -1,20 +1,16 @@
-/*
- * TODO Clean up directories.
- */
-
 // Dependencies
 const express = require('express')
-const server = express()
 const https = require('https')
 const fs = require('fs')
 const JsonDB = require('node-json-db')
+const basicAuth = require('express-basic-auth')
+
+// Variables
+const server = express()
 if (!fs.existsSync('Config')) {
   fs.mkdirSync('Config')
 }
 const db = new JsonDB('./Config/config', true, true)
-const basicAuth = require('express-basic-auth')
-
-// Variables
 const sslOptions = {
   key: undefined,
   cert: undefined
@@ -29,6 +25,16 @@ let accounts
 let certPath, keyPath
 
 // Functions
+function getFormattedTime () {
+  let date = new Date()
+  return `[${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(-2)}]`
+}
+
+function reply (message) {
+  let date = new Date()
+  console.log(`\x1b[33m[${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(-2)}]\x1b[0m  ${message}`)
+}
+
 function setupConfig () {
   // TODO Type check and integrity check every single thing here.
   /* Access */
@@ -108,16 +114,6 @@ function getData (path) {
   }
 }
 
-function getFormattedTime () {
-  let date = new Date()
-  return `[${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(-2)}]`
-}
-
-function reply (message) {
-  let date = new Date()
-  console.log(`\x1b[33m[${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}:${('0' + date.getSeconds()).slice(-2)}]\x1b[0m  ${message}`)
-}
-
 function isValidUserAgent (userAgent) {
   return (
     userAgent.length > 0 &&
@@ -174,44 +170,37 @@ function main () {
     return
   }
   https.createServer(sslOptions, server).listen(443)
-  reply('[DIPSFREE] Running!')
-
   server.use(basicAuth(accounts))
-
   server.get('/updater', function (req, res) {
     let userAgent = req.get('User-Agent')
-
-    // Make sure that the user agent is in the format that we expect
     if (!isValidUserAgent(userAgent)) {
       declineAccess(res)
       return
     }
 
-    let splitAgent = userAgent.split('#')
+    // Reload the database to see latest changes
+    db.reload()
 
+    let splitAgent = userAgent.split('#')
     if (checkAuthorised(splitAgent[0], splitAgent[1], authMethod, authType)) {
       acceptAccess(res)
       fs.appendFileSync('Logs/AuthLogs.txt', `${getFormattedTime()} AUTHORISED ${userAgent}\n`)
 
       reply(`[DIPSFREE] Got IP for '${splitAgent[0]} on ${splitAgent[1]}' => ${req.connection.remoteAddress}`)
 
-      // Create folder structure
       if (!fs.existsSync('Logs')) {
         fs.mkdirSync('Logs')
       }
       if (!fs.existsSync(`Logs/${splitAgent[0]}`)) {
         fs.mkdirSync(`Logs/${splitAgent[0]}`)
       }
-      //
 
-      // Write IP to file
       fs.writeFile(`Logs/${splitAgent[0]}/${splitAgent[1]}.txt`, `${req.connection.remoteAddress}\n`, (err) => {
         if (err) {
           reply(`File write error: ${err}`)
         }
       })
     } else {
-      // UserAgent not in our list.
       declineAccess(res)
       if (!fs.existsSync('Logs')) {
         fs.mkdirSync('Logs')
@@ -220,6 +209,7 @@ function main () {
       fs.appendFileSync('Logs/AuthLogs.txt', `${getFormattedTime()} UNKNOWN_ID ${userAgent}\n`)
     }
   })
+  reply('[DIPSFREE] Running!')
 }
 
 // Main code
